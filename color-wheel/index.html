@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>HTML5 Color Wheel</title>
+</head>
+<body>
+<canvas id="draw" width="800" height="800"></canvas>
+<script>
+  console.log("color wheel");
+  function hue(RGB) {
+    const R = RGB[0]/255;
+    const G = RGB[1]/255;
+    const B = RGB[2]/255;
+    const alpha = 0.5 * (2 * R - G - B);
+    const beta = Math.sqrt(3) * 0.5 * (G - B);
+    return Math.atan2(beta, alpha);
+  }
+  function chroma(RGB) {
+    const R = RGB[0]/255;
+    const G = RGB[1]/255;
+    const B = RGB[2]/255;
+    const alpha = 0.5 * (2 * R - G - B);
+    const beta = Math.sqrt(3) * 0.5 * (G - B);
+    return Math.sqrt(alpha * alpha + beta * beta);
+  }
+  const canvas = document.querySelector('#draw');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  // X and Y are the center of the page. Use this to translate color dots.
+  // Also use scale to fill the page.
+  const X = canvas.width/2;
+  const Y = canvas.height/2;
+  let radius = Math.min(X, Y) - 25;
+  // console.log({X, Y, scale});
+  const n_dots = 250;
+  const angle_increment = 2*Math.PI/n_dots;
+
+  const circles = [];
+    for (let i = 0; i < n_dots; i++) {
+      // Choose random numbers between 0 and 255 for red, green, and blue.
+      let randomR = Math.round(Math.random() * 255);
+      let randomB = Math.round(Math.random() * 255);
+      let randomG = Math.round(Math.random() * 255);
+
+      circles.push([randomR, randomB, randomG])
+    }
+
+  circles.sort((a,b) => hue(a) - hue(b));
+
+  for (i = 0; i < n_dots; i++) {
+    let angle1 = angle_increment * (i-.5);
+    let angle2 = angle_increment * (i+.5);
+    let X1 = X + Math.cos(angle1) * radius;
+    let Y1 = Y + Math.sin(angle1) * radius;
+    let X2 = X + Math.cos(angle2) * radius;
+    let Y2 = Y + Math.sin(angle2) * radius;
+
+    // Start at the center, draw line to start of arc, draw are.
+    // ctx.fill() will close the wedge.
+    ctx.beginPath();
+    ctx.moveTo(X, Y);
+    ctx.lineTo(X1, Y1);
+    ctx.arc(X, Y, radius, angle1, angle2);
+
+    const randomRGB = circles[i];
+
+    // I don't actually know why I had to compute the hex color.
+    // Setting fillStyle to "rgb(r, g, b)" did not work, dots were all black.
+    let HexColor = "#";
+    if (randomRGB[0] < 16) HexColor += "0";
+    HexColor += randomRGB[0].toString(16);
+    if (randomRGB[1] < 16) HexColor += "0";
+    HexColor += randomRGB[1].toString(16);
+    if (randomRGB[2] < 16) HexColor += "0";
+    HexColor += randomRGB[2].toString(16);
+    // Show the circle!!!!!
+    ctx.fillStyle = HexColor;
+    ctx.fill();
+  }
+</script>
+
+<style>
+  html, body {
+    margin: 0;
+  }
+</style>
+
+</body>
+</html>

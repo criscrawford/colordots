@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>HTML5 Color Dots</title>
+</head>
+<body>
+<canvas id="draw" width="800" height="800"></canvas>
+<script>
+  const canvas = document.querySelector('#draw');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  // X and Y are the center of the page. Use this to translate color dots.
+  // Also use scale to fill the page.
+  const X = canvas.width/2;
+  const Y = canvas.height/2;
+  const scale = Math.min(X / 255, Y / 255);
+  // console.log({X, Y, scale});
+  for (let i = 0; i < 10000; i++) {
+    // Choose random numbers between 0 and 255 for red, green, and blue.
+    let randomR = Math.round(Math.random() * 255);
+    let randomB = Math.round(Math.random() * 255);
+    let randomG = Math.round(Math.random() * 255);
+    // alpha and beta convert RGB to hue and chroma. These are points on the XY plane.
+    // hue is the angle with the X-axis and chroma is the distance from the origin.
+    // We aren't computing these because we're just plotting X and Y.
+    let alpha = 0.5 * (2 * randomR - randomG - randomB);
+    let beta = Math.sqrt(3) * 0.5 * (randomG - randomB);
+    alpha *= scale;
+    beta *= scale;
+    // console.log({alpha, beta});
+    // Create the circle using ctx.arc. Radius is 5px, start angle is 0, end is 2*pi.
+    ctx.beginPath();
+    ctx.arc(alpha+X, beta+Y, 5, 0, 2 * Math.PI);
+    // I don't actually know why I had to computer the hex color.
+    // Setting fillStyle to "rgb(r, g, b)" did not work, dots were all black.
+    let HexColor = "#";
+    if (randomR < 16) HexColor += "0";
+    HexColor += randomR.toString(16);
+    if (randomG < 16) HexColor += "0";
+    HexColor += randomG.toString(16);
+    if (randomB < 16) HexColor += "0";
+    HexColor += randomB.toString(16);
+    // Show the circle!!!!!
+    ctx.fillStyle = HexColor;
+    ctx.fill();
+  }
+</script>
+
+<style>
+  html, body {
+    margin: 0;
+  }
+</style>
+
+</body>
+</html>

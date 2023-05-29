@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>HTML5 Canvas</title>
+  </head>
+  <body>
+    <canvas id="draw" width="800" height="800"></canvas>
+    <script>
+      // This is just a version of color-dots with 100000 dots
+      // And fewer comments
+      const canvas = document.querySelector("#draw");
+      const ctx = canvas.getContext("2d");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const X = canvas.width / 2;
+      const Y = canvas.height / 2;
+      const scale = Math.min(X / 255, Y / 255);
+      // console.log({scale});
+      for (let i = 0; i < 100000; i++) {
+        let randomR = Math.round(Math.random() * 255);
+        let randomB = Math.round(Math.random() * 255);
+        let randomG = Math.round(Math.random() * 255);
+        let alpha = 0.5 * (2 * randomR - randomG - randomB);
+        let beta = Math.sqrt(3) * 0.5 * (randomG - randomB);
+        alpha *= scale;
+        beta *= scale;
+        // console.log({alpha, beta});
+        ctx.beginPath();
+        ctx.arc(alpha + X, beta + Y, 5, 0, 2 * Math.PI);
+        let HexColor = "#";
+        if (randomR < 16) HexColor += "0";
+        HexColor += randomR.toString(16);
+        if (randomG < 16) HexColor += "0";
+        HexColor += randomG.toString(16);
+        if (randomB < 16) HexColor += "0";
+        HexColor += randomB.toString(16);
+        ctx.fillStyle = HexColor;
+        ctx.fill();
+      }
+    </script>
+
+    <style>
+      html,
+      body {
+        margin: 0;
+      }
+    </style>
+  </body>
+</html>

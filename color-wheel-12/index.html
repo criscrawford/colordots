@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>HTML5 Color Wheel</title>
+</head>
+
+<body>
+  <div>
+    <button onClick="(() => colorWheel('RGB'))();">RGB Color Wheel</button>
+    <button onClick="(() => colorWheel('RYB'))();">RYB Color Wheel</button>
+    <button onClick="(() => colorWheel('random'))();">Random Wheel</button>
+    <button onClick="(() => colorScheme('analogous'))();">Analogous</button>
+    <button onClick="(() => colorScheme('complementary'))();">Complementary</button>
+    <button onClick="(() => colorScheme('split'))();">Split Complementary</button>
+    <button onClick="(() => colorScheme('tertiary'))();">Triadic</button>
+    <button onClick="(() => colorScheme('square'))();">Square</button>
+  </div>
+  <canvas id="draw" width="800" height="800"></canvas>
+  <script>
+    function hue(RGB) {
+      const R = RGB[0] / 255;
+      const G = RGB[1] / 255;
+      const B = RGB[2] / 255;
+      const alpha = 0.5 * (2 * R - G - B);
+      const beta = Math.sqrt(3) * 0.5 * (G - B);
+      return Math.atan2(beta, alpha);
+    }
+    function chroma(RGB) {
+      const R = RGB[0] / 255;
+      const G = RGB[1] / 255;
+      const B = RGB[2] / 255;
+      const alpha = 0.5 * (2 * R - G - B);
+      const beta = Math.sqrt(3) * 0.5 * (G - B);
+      return Math.sqrt(alpha * alpha + beta * beta);
+    }
+    colorWheel("RGB");
+    function colorWheel(type) {
+      const canvas = document.querySelector('#draw');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth - 25;
+      canvas.height = window.innerHeight - 25;
+      // X and Y are the center of the page. Use this to translate color dots.
+      // Also use scale to fill the page. Subtract a little from Y for button row.
+      const X = canvas.width / 2;
+      const Y = canvas.height / 2 + 5;
+      let scale = Math.min(canvas.width, canvas.height) / 2;
+      // console.log({X, Y, scale});
+      const n_dots = 12;
+      const angle_increment = 2 * Math.PI / n_dots;
+
+      const radius = 50;
+      scale -= 2 * radius;
+      let i;
+      let choice = type;
+
+      const circles = [];
+      if (choice === "random") {
+        for (i = 0; i < n_dots; i++) {
+          // Choose random numbers between 0 and 255 for red, green, and blue.
+          let randomR = Math.round(Math.random() * 255);
+          let randomB = Math.round(Math.random() * 255);
+          let randomG = Math.round(Math.random() * 255);
+          circles.push([randomR, randomB, randomG]);
+        }
+        circles.sort((a, b) => hue(a) - hue(b));
+      } else if (choice === "RGB") {
+        // Let's make the color wheel!
+        circles[0] = [200, 255, 0]; // yellow-green
+        circles[1] = [0, 255, 0]; // green
+        circles[2] = [0, 255, 200]; // cyan-green
+        circles[3] = [0, 255, 255]; // cyan
+        circles[4] = [0, 150, 255]; // cyan-blue
+        circles[5] = [0, 0, 255]; // blue
+        circles[6] = [150, 0, 255]; // magenta-blue
+        circles[7] = [255, 0, 255]; // magenta
+        circles[8] = [255, 0, 150]; // magenta-red
+        circles[9] = [255, 0, 0];   // red
+        circles[10] = [255, 175, 0];  // yellow-red (orange)
+        circles[11] = [255, 255, 0];  // yellow
+      } else if (choice === "RYB") {
+        circles[0] = [255, 204, 0]; // yellow-orange
+        circles[1] = [255, 255, 0]; // yellow
+        circles[2] = [125, 229, 0]; // yellow-green
+        circles[3] = [0, 204, 0]; // green
+        circles[4] = [0, 127, 102]; // blue-green
+        circles[5] = [0, 51, 204]; // blue
+        circles[6] = [52, 35, 178];  // blue-violet
+        circles[7] = [102, 0, 153]; // purple
+        circles[8] = [178, 0, 76];  // red-violet
+        circles[9] = [255, 0, 0];   // red
+        circles[10] = [255, 76, 0]; // red-orange
+        circles[11] = [255, 153, 0]; // orang4
+      }
+
+      for (i = 0; i < n_dots; i++) {
+        let angle = angle_increment * i;
+        let alpha = Math.cos(angle);
+        let beta = Math.sin(angle);
+
+        alpha *= scale;
+        beta *= scale;
+
+        // console.log({alpha, beta});
+        // Create the circle using ctx.arc. Radius is 5px, start angle is 0, end is 2*pi.
+        ctx.beginPath();
+        ctx.arc(alpha + X, beta + Y, radius, 0, 2 * Math.PI);
+
+        const randomRGB = circles[i];
+
+        console.log(hue(randomRGB));
+
+        // I don't actually know why I had to computer the hex color.
+        // Setting fillStyle to "rgb(r, g, b)" did not work, dots were all black.
+        let HexColor = "#";
+        if (randomRGB[0] < 16) HexColor += "0";
+        HexColor += randomRGB[0].toString(16);
+        if (randomRGB[1] < 16) HexColor += "0";
+        HexColor += randomRGB[1].toString(16);
+        if (randomRGB[2] < 16) HexColor += "0";
+        HexColor += randomRGB[2].toString(16);
+        // Show the circle!!!!!
+        ctx.fillStyle = HexColor;
+        ctx.fill();
+      }
+    }
+    function colorScheme(type) {
+      const canvas = document.querySelector('#draw');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth - 25;
+      canvas.height = window.innerHeight - 25;
+      // X and Y are the center of the page. Use this to translate color dots.
+      // Also use scale to fill the page. Subtract a little from Y for button row.
+      const X = canvas.width / 2;
+      const Y = canvas.height / 2 + 5;
+      let scale = Math.min(canvas.width, canvas.height) / 2;
+      // console.log({X, Y, scale});
+      const n_dots = 12;
+      const angle_increment = 2 * Math.PI / n_dots;
+
+      const radius = 50;
+      scale -= 2 * radius;
+      let i;
+
+      const circles = [];
+      // Let's make the color wheel!
+      circles[0] = [200, 255, 0]; // yellow-green
+      circles[1] = [0, 255, 0]; // green
+      circles[2] = [0, 255, 200]; // cyan-green
+      circles[3] = [0, 255, 255]; // cyan
+      circles[4] = [0, 150, 255]; // cyan-blue
+      circles[5] = [0, 0, 255]; // blue
+      circles[6] = [150, 0, 255]; // magenta-blue
+      circles[7] = [255, 0, 255]; // magenta
+      circles[8] = [255, 0, 150]; // magenta-red
+      circles[9] = [255, 0, 0];   // red
+      circles[10] = [255, 175, 0];  // yellow-red (orange)
+      circles[11] = [255, 255, 0];  // yellow
+
+      for (i = 0; i < n_dots; i++) {
+        let angle = angle_increment * i;
+        let alpha = Math.cos(angle);
+        let beta = Math.sin(angle);
+
+        alpha *= scale;
+        beta *= scale;
+
+        // console.log({alpha, beta});
+        // Create the circle using ctx.arc. Radius is 5px, start angle is 0, end is 2*pi.
+        ctx.beginPath();
+        ctx.arc(alpha + X, beta + Y, radius, 0, 2 * Math.PI);
+
+        const randomRGB = circles[i];
+
+        // I don't actually know why I had to computer the hex color.
+        // Setting fillStyle to "rgb(r, g, b)" did not work, dots were all black.
+        let HexColor = "#";
+        if (randomRGB[0] < 16) HexColor += "0";
+        HexColor += randomRGB[0].toString(16);
+        if (randomRGB[1] < 16) HexColor += "0";
+        HexColor += randomRGB[1].toString(16);
+        if (randomRGB[2] < 16) HexColor += "0";
+        HexColor += randomRGB[2].toString(16);
+        // Show the circle!!!!!
+        ctx.fillStyle = HexColor;
+        ctx.fill();
+
+        console.log({ type, i });
+        // Make an indicator for the color scheme in some cases.
+        if ((type === "analogous" && (i === 7 || i === 5 || i === 6)) ||
+          (type === "complementary" && (i === 2 || i === 8)) ||
+          (type === "split" && (i === 1 || i === 3 || i === 8)) ||
+          (type === "tertiary" && (i === 1 || i === 5 || i === 9)) ||
+          (type === "square" && (i === 1 || i === 4 || i === 7 || i === 10))) {
+          // Make a bunch of dots pointing to the current circle
+          for (let j = 0; j <= 10; j++) {
+            ctx.beginPath();
+            ctx.arc(alpha * j * 0.1 + X, beta * j * 0.1 + Y, radius * 0.1, 0, 2 * Math.PI);
+            ctx.fillStyle = "#000000";
+            ctx.fill();
+
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    html,
+    body {
+      margin: 0;
+    }
+  </style>
+
+</body>
+
+</html>
